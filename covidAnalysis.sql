@@ -21,12 +21,19 @@ SELECT Location, Date, population, total_cases, (total_cases/population)*100 as 
 	and continent is not NULL
 	ORDER BY 1,2
 
---highest infection rate compaired to population per country
-SELECT Location, population, MAX(total_cases) as "highestInfectCount", MAX((total_cases/population)*100) as "highestPercentInfected" 
+--**highest infection rate compaired to population per country
+SELECT Location, population, MAX(total_cases) as "highestInfectCount", MAX((total_cases/population)*100) as "PercentPopInfected" 
 	FROM COVIDAnalysis..covidDeaths
-	WHERE continent is not NULL
+	WHERE continent is not NULL --remove this to incl. world, EU, continents
 	GROUP BY Location, population
-	ORDER BY highestPercentInfected desc
+	ORDER BY PercentPopInfected desc
+
+--**highest infection rate per day, incl. global regions
+SELECT Location, population, date, MAX(total_cases) as "highestInfectCount", MAX((total_cases/population)*100) as "PercentPopInfected" 
+	FROM COVIDAnalysis..covidDeaths
+	--WHERE continent is not NULL --remove this to incl. world, EU, continents
+	GROUP BY Location, population, date
+	ORDER BY PercentPopInfected desc
 
 --highest death count per population
 SELECT Location, MAX(cast(Total_deaths as int)) as "totalDeathCount"
@@ -35,7 +42,16 @@ SELECT Location, MAX(cast(Total_deaths as int)) as "totalDeathCount"
 	GROUP BY Location
 	ORDER BY "totalDeathCount" desc	
 
+
 --CONTINENT DATA
+--**highest death count per continent, incl class division
+Select location, SUM(cast(new_deaths as int)) as TotalDeathCount
+	From COVIDAnalysis..CovidDeaths
+	Where continent is null 
+	and location not in ('World', 'European Union', 'International')
+	Group by location
+	order by TotalDeathCount desc
+
 --looking at highest death count per population by continent
 SELECT continent, MAX(cast(Total_deaths as int)) as "totalDeathCount"
 	FROM COVIDAnalysis..covidDeaths
@@ -44,7 +60,7 @@ SELECT continent, MAX(cast(Total_deaths as int)) as "totalDeathCount"
 	ORDER BY "totalDeathCount" desc	
 
 --GLOBAL DATA
---sum of new cases = total cases, sum of new deaths = total deaths --> b/c can't do aggregate func in aggregate func
+--**sum of new cases = total cases, sum of new deaths = total deaths --> b/c can't do aggregate func in aggregate func
 SELECT date, SUM(new_cases) as "totalCases", SUM(cast(new_deaths as int)) as "totalDeaths", (SUM(cast(new_deaths as int))/SUM(new_cases))*100 as "deathPercentage" 
 	FROM COVIDAnalysis..covidDeaths
 	WHERE continent is not NULL
@@ -72,17 +88,6 @@ SELECT Dth.continent, dth.location, dth.date, dth.population, vac.new_vaccinatio
 		and Dth.date = Vac.date 
 	WHERE Dth.continent is not NULL
 	ORDER BY 1, 2, 3
-
---Vaccination rolling count
---SELECT Dth.continent, Dth.location, Dth.date, Dth.population, Vac.new_vaccinations
---, SUM(CONVERT(bigint, Vac.new_vaccinations)) OVER (Partition by Dth.location ORDER BY Dth.location, Dth.date) as "vacRollingCount"
---	FROM COVIDAnalysis..covidDeaths Dth
-----, (vacRollingCount/dth.population)*100
---	JOIN COVIDAnalysis..covidVaccinations Vac
---		ON Dth.location = Vac.location
---		and Dth.date = Vac.date 
---	WHERE Dth.continent is not NULL
---	ORDER BY 1, 2, 3
 
 --Vaccination rolling count using CTE
 WITH popVsVac(continent, location, date, population, new_vaccinations, vacRollingCount)
