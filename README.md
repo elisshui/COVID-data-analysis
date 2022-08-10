@@ -4,4 +4,4 @@ With so much data avaliable, I decided to create a personalized COVID-19 dashboa
 <a href="https://ourworldindata.org/covid-deaths">ourworldindata.org</a> and used Microsoft SQL to explore the data set. Thereafter, I selected a few queries I
 wanted to visualize then ultilized Tableau to create my dashbaord.</p>
 <h2>Dashboard</h2>
-<img src="Images/covidImgs/covidDashboard.JPG", alt="COVID-19 Dashboard" width="100%">
+<img src="https://github.com/elisshui/elisshui.github.io/blob/master/Images/covidImgs/covidDashboard.JPG", alt="COVID-19 Dashboard" width="100%">
